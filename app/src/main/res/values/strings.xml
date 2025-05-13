@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">DaztlMobile</string>
+    <string name="correo">Correo</string>
+    <string name="contrase_a">Contraseña</string>
+    <string name="login">Iniciar Sesión</string>
+    <string name="logo_daztl">Logo DAZTL</string>
+</resources>
