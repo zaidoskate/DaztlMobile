@@ -16,9 +16,9 @@
         android:textSize="32sp"
         android:textStyle="bold"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintTop_margin="48dp"
+        android:layout_marginTop="48dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintEnd_toEndOf="parent" />
 
     <!-- Email -->
     <com.google.android.material.textfield.TextInputLayout
@@ -26,21 +26,22 @@
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:hint="@string/correo"
+        android:hint="@string/username"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:theme="@style/ThemeOverlay.MaterialComponents.TextInputEditText"
         app:boxStrokeColor="@color/bg_gray"
-        app:hintTextColor="@color/text_white"
         app:layout_constraintTop_toBottomOf="@id/tvLogo"
-        app:layout_constraintTop_margin="32dp"
+        android:layout_marginTop="32dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_margin="24dp">
+        app:layout_constraintEnd_toEndOf="parent">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textEmailAddress"
-            android:textColor="@color/text_white"/>
+            android:textColor="@color/text_white" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Contraseña -->
@@ -50,10 +51,11 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:hint="@string/contrase_a"
+        android:theme="@style/ThemeOverlay.MaterialComponents.TextInputEditText"
         app:boxStrokeColor="@color/bg_gray"
-        app:passwordToggleEnabled="true"
+        app:endIconMode="password_toggle"
+        android:layout_marginTop="16dp"
         app:layout_constraintTop_toBottomOf="@id/tilEmail"
-        app:layout_constraintTop_margin="16dp"
         app:layout_constraintStart_toStartOf="@id/tilEmail"
         app:layout_constraintEnd_toEndOf="@id/tilEmail">
 
@@ -62,7 +64,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="textPassword"
-            android:textColor="@color/text_white"/>
+            android:textColor="@color/text_white" />
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Botón Iniciar Sesión -->
@@ -70,14 +72,12 @@
         android:id="@+id/btnLogin"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="24dp"
         android:backgroundTint="@color/accent_blue"
         android:text="@string/login"
         android:textAllCaps="false"
         android:textColor="@color/bg_dark"
         app:layout_constraintEnd_toEndOf="@id/tilPassword"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="@id/tilPassword"
-        app:layout_constraintTop_margin="24dp"
         app:layout_constraintTop_toBottomOf="@id/tilPassword" />
 </androidx.constraintlayout.widget.ConstraintLayout>
