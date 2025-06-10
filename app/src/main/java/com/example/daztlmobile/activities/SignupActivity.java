@@ -8,14 +8,14 @@ import android.widget.Button;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.daztlmobile.R;
-import com.example.daztlmobile.models.RegisterRequest;
-import com.example.daztlmobile.models.UserResponse;
 import com.example.daztlmobile.network.ApiClient;
 import com.example.daztlmobile.network.ApiService;
+import com.example.daztlmobile.network.GrpcClient;
 import com.google.android.material.textfield.TextInputEditText;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import daztl.MusicServiceGrpc;
+import io.grpc.ManagedChannel;
+import io.grpc.stub.StreamObserver;
+
 
 public class SignupActivity extends AppCompatActivity {
     private TextInputEditText etName, etUsername, etLastName, etEmail, etPassword, etConfirm;
@@ -67,44 +67,57 @@ public class SignupActivity extends AppCompatActivity {
         etConfirm.addTextChangedListener(passwordWatcher);
 
         btnSignup.setOnClickListener(v -> {
-            String name      = etName.getText().toString().trim();
-            String username  = etUsername.getText().toString().trim();
-            String lastName  = etLastName.getText().toString().trim();
-            String email     = etEmail.getText().toString().trim();
-            String pass      = etPassword.getText().toString();
-            String confirm   = etConfirm.getText().toString();
+            String username = etUsername.getText().toString().trim();
+            String password = etPassword.getText().toString().trim();
+            String email = etEmail.getText().toString().trim();
+            String name = etName.getText().toString().trim();
+            String lastName = etLastName.getText().toString().trim();
 
-            if (name.isEmpty() || username.isEmpty() || lastName.isEmpty()
-                    || email.isEmpty() || pass.isEmpty() || !pass.equals(confirm)) {
-                Toast.makeText(this, "Completa todos los campos correctamente", Toast.LENGTH_SHORT).show();
+            if (username.isEmpty() || password.isEmpty() || email.isEmpty() || name.isEmpty() || lastName.isEmpty()) {
+                Toast.makeText(this, "Por favor completa todos los campos", Toast.LENGTH_SHORT).show();
                 return;
             }
 
-            RegisterRequest req = new RegisterRequest();
-            req.username   = username;
-            req.email      = email;
-            req.password   = pass;
-            req.first_name = name;
-            req.last_name  = lastName;
+            daztl.DaztlService.RegisterRequest request = daztl.DaztlService.RegisterRequest.newBuilder()
+                    .setUsername(username)
+                    .setPassword(password)
+                    .setEmail(email)
+                    .setFirstName(name)
+                    .setLastName(lastName)
+                    .build();
 
-            api.register(req).enqueue(new Callback<UserResponse>() {
+            ManagedChannel channel = GrpcClient.getChannel();
+            MusicServiceGrpc.MusicServiceStub stub = MusicServiceGrpc.newStub(channel);
+
+            stub.registerUser(request, new StreamObserver<daztl.DaztlService.GenericResponse>() {
                 @Override
-                public void onResponse(Call<UserResponse> call, Response<UserResponse> res) {
-                    if (res.isSuccessful()) {
-                        Toast.makeText(SignupActivity.this, "Registro exitoso", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(SignupActivity.this, LoginActivity.class));
-                        finish();
-                    } else {
-                        Toast.makeText(SignupActivity.this, "Error en registro", Toast.LENGTH_SHORT).show();
-                    }
+                public void onNext(daztl.DaztlService.GenericResponse response) {
+                    runOnUiThread(() -> {
+                        if (response.getStatus().equalsIgnoreCase("success")) {
+                            Toast.makeText(SignupActivity.this, "Cuenta creada con éxito", Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(SignupActivity.this, LoginActivity.class));
+                            finish();
+                        } else {
+                            Toast.makeText(SignupActivity.this, response.getMessage(), Toast.LENGTH_LONG).show();
+                        }
+                    });
                 }
 
                 @Override
-                public void onFailure(Call<UserResponse> call, Throwable t) {
-                    Toast.makeText(SignupActivity.this, "Fallo de red", Toast.LENGTH_SHORT).show();
+                public void onError(Throwable t) {
+                    runOnUiThread(() ->
+                            Toast.makeText(SignupActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_LONG).show()
+                    );
+                }
+
+                @Override
+                public void onCompleted() {
+                    channel.shutdown();
                 }
             });
         });
+
+
 
         findViewById(R.id.tvGoToLogin).setOnClickListener(v -> {
             Intent intent = new Intent(SignupActivity.this, LoginActivity.class);

@@ -1,41 +1,43 @@
 package com.example.daztlmobile.activities;
 
-import android.content.Intent;
 import android.os.Bundle;
+import android.content.Intent;
 import android.widget.Button;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.daztlmobile.R;
-import com.example.daztlmobile.models.LoginRequest;
-import com.example.daztlmobile.models.LoginResponse;
-import com.example.daztlmobile.network.ApiClient;
-import com.example.daztlmobile.network.ApiService;
+import com.example.daztlmobile.network.GrpcClient;
 import com.example.daztlmobile.utils.SessionManager;
 import com.google.android.material.textfield.TextInputEditText;
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+import daztl.MusicServiceGrpc;
+import io.grpc.ManagedChannel;
+import io.grpc.StatusRuntimeException;
 
 public class LoginActivity extends AppCompatActivity {
-    private TextInputEditText etEmail, etPassword;
+    private TextInputEditText etUsername, etPassword;
     private Button btnLogin;
-    private ApiService api;
     private SessionManager session;
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        api = ApiClient.getClient(this).create(ApiService.class);
         session = new SessionManager(this);
 
-        etEmail    = findViewById(R.id.etEmail);
+        etUsername = findViewById(R.id.etEmail);
         etPassword = findViewById(R.id.etPassword);
-        btnLogin   = findViewById(R.id.btnLogin);
+        btnLogin = findViewById(R.id.btnLogin);
 
         btnLogin.setOnClickListener(v -> {
-            String email = etEmail.getText().toString().trim();
+            String email = etUsername.getText().toString().trim();
             String pass = etPassword.getText().toString();
 
             if (email.isEmpty() || pass.isEmpty()) {
@@ -43,25 +45,38 @@ public class LoginActivity extends AppCompatActivity {
                 return;
             }
 
-            LoginRequest req = new LoginRequest();
-            req.username = email;
-            req.password = pass;
+            executor.execute(() -> {
+                try {
+                    ManagedChannel channel = GrpcClient.getChannel();
 
-            api.login(req).enqueue(new Callback<LoginResponse>() {
-                @Override
-                public void onResponse(Call<LoginResponse> call, Response<LoginResponse> res) {
-                    if (res.isSuccessful() && res.body() != null) {
-                        session.saveToken(res.body().token);
-                        startActivity(new Intent(LoginActivity.this, HomeActivity.class));
+                    MusicServiceGrpc.MusicServiceBlockingStub stub = MusicServiceGrpc.newBlockingStub(channel);
+
+                    daztl.DaztlService.LoginRequest request = daztl.DaztlService.LoginRequest.newBuilder()
+                            .setUsername(email)
+                            .setPassword(pass)
+                            .build();
+
+                    daztl.DaztlService.LoginResponse response = stub.loginUser(request);
+
+                    runOnUiThread(() -> {
+                        session.saveToken(response.getAccessToken());
+                        Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                        startActivity(intent);
                         finish();
-                    } else {
-                        Toast.makeText(LoginActivity.this, "Credenciales inválidas", Toast.LENGTH_SHORT).show();
-                    }
-                }
-                @Override
-                public void onFailure(Call<LoginResponse> call, Throwable t) {
-                    t.printStackTrace();
-                    Toast.makeText(LoginActivity.this, "Fallo de red", Toast.LENGTH_SHORT).show();
+                    });
+
+                    channel.shutdown();
+
+                } catch (StatusRuntimeException e) {
+                    e.printStackTrace();
+                    runOnUiThread(() ->
+                            Toast.makeText(LoginActivity.this, "Credenciales inválidas", Toast.LENGTH_SHORT).show()
+                    );
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    runOnUiThread(() ->
+                            Toast.makeText(LoginActivity.this, "Error de red o del servidor", Toast.LENGTH_SHORT).show()
+                    );
                 }
             });
         });

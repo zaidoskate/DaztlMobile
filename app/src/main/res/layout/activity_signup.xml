@@ -12,7 +12,7 @@
         android:id="@+id/tvSignupTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Crear Cuenta"
+        android:text="Nueva cuenta"
         android:textColor="@color/text_white"
         android:textSize="28sp"
         android:textStyle="bold"
@@ -45,28 +45,6 @@
             android:textColor="@color/text_white" />
     </com.google.android.material.textfield.TextInputLayout>
 
-    <!-- Username -->
-    <com.google.android.material.textfield.TextInputLayout
-        android:id="@+id/tilUsername"
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:hint="Nombre de usuario"
-        android:layout_marginTop="16dp"
-        android:theme="@style/ThemeOverlay.MaterialComponents.TextInputEditText"
-        app:boxStrokeColor="@color/bg_gray"
-        app:layout_constraintTop_toBottomOf="@id/tilName"
-        app:layout_constraintStart_toStartOf="@id/tilName"
-        app:layout_constraintEnd_toEndOf="@id/tilName">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/etUsername"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="text"
-            android:textColor="@color/text_white" />
-    </com.google.android.material.textfield.TextInputLayout>
-
     <!-- Apellido -->
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/tilLastName"
@@ -77,9 +55,9 @@
         android:layout_marginTop="16dp"
         android:theme="@style/ThemeOverlay.MaterialComponents.TextInputEditText"
         app:boxStrokeColor="@color/bg_gray"
-        app:layout_constraintTop_toBottomOf="@id/tilUsername"
-        app:layout_constraintStart_toStartOf="@id/tilUsername"
-        app:layout_constraintEnd_toEndOf="@id/tilUsername">
+        app:layout_constraintTop_toBottomOf="@id/tilName"
+        app:layout_constraintStart_toStartOf="@id/tilName"
+        app:layout_constraintEnd_toEndOf="@id/tilName">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etLastName"
@@ -88,6 +66,29 @@
             android:inputType="textPersonName"
             android:textColor="@color/text_white" />
     </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Username -->
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilUsername"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:hint="Nombre de usuario"
+        android:layout_marginTop="16dp"
+        android:theme="@style/ThemeOverlay.MaterialComponents.TextInputEditText"
+        app:boxStrokeColor="@color/bg_gray"
+        app:layout_constraintTop_toBottomOf="@id/tilLastName"
+        app:layout_constraintStart_toStartOf="@id/tilLastName"
+        app:layout_constraintEnd_toEndOf="@id/tilLastName">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/etUsername"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="text"
+            android:textColor="@color/text_white" />
+    </com.google.android.material.textfield.TextInputLayout>
+
 
     <!-- Correo -->
     <com.google.android.material.textfield.TextInputLayout
@@ -99,7 +100,7 @@
         android:layout_marginTop="16dp"
         android:theme="@style/ThemeOverlay.MaterialComponents.TextInputEditText"
         app:boxStrokeColor="@color/bg_gray"
-        app:layout_constraintTop_toBottomOf="@id/tilLastName"
+        app:layout_constraintTop_toBottomOf="@id/tilUsername"
         app:layout_constraintStart_toStartOf="@id/tilLastName"
         app:layout_constraintEnd_toEndOf="@id/tilLastName">
 

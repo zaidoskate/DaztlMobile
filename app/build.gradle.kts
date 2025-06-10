@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    id("com.google.protobuf") version "0.9.4"
 }
 
 android {
@@ -12,7 +13,6 @@ android {
         targetSdk = 35
         versionCode = 1
         versionName = "1.0"
-
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -25,22 +25,65 @@ android {
             )
         }
     }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
+
+    // Necesario si usás código generado en Java
+    sourceSets {
+        getByName("main").java.srcDirs(
+            "src/main/java",
+            "build/generated/source/proto/main/java",
+            "build/generated/source/proto/main/grpc"
+        )
+    }
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.24.4"
+    }
+    plugins {
+        create("grpc") {
+            artifact = "io.grpc:protoc-gen-grpc-java:1.64.0"
+        }
+    }
+    generateProtoTasks {
+        all().forEach { task ->
+            task.builtins {
+                create("java") {
+                    option("lite")
+                }
+            }
+            task.plugins {
+                create("grpc") {
+                    option("lite")
+                }
+            }
+        }
+    }
 }
 
 dependencies {
-
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
-    implementation (libs.constraintlayout.v214)
-    implementation ("com.squareup.okhttp3:okhttp:4.9.3")
-    implementation (libs.retrofit)
-    implementation (libs.converter.gson)
+    implementation(libs.constraintlayout.v214)
+    implementation(libs.okhttp)
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    annotationProcessor(libs.compiler)
+    implementation(libs.glide)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+
+    // gRPC para Android (lite)
+    implementation(libs.grpc.okhttp.v1640)
+    implementation(libs.grpc.protobuf.lite.v1640)
+    implementation(libs.grpc.stub.v1640)
+    implementation(libs.javax.annotation.api)
+    implementation(libs.protobuf.javalite)
 }

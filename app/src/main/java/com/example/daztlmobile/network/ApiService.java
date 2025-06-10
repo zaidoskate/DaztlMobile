@@ -1,5 +1,6 @@
 package com.example.daztlmobile.network;
 
+import com.example.daztlmobile.models.RecommendedSongsResponse;
 import com.example.daztlmobile.models.RegisterRequest;
 import com.example.daztlmobile.models.LoginRequest;
 import com.example.daztlmobile.models.LoginResponse;
@@ -15,6 +16,7 @@ import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.DELETE;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
@@ -59,5 +61,6 @@ public interface ApiService {
     @GET("artists/{id}/like/status/")
     Call<LikeStatusResponse> isArtistLiked(@Path("id") int artistId);
 
-    // Agrega aquí más endpoints según tus CU futuros...
+    @GET("songs/recommended/")
+    Call<RecommendedSongsResponse> getRecommendedSongs(@Header("Authorization") String token);
 }
