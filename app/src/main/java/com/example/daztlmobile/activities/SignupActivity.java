@@ -11,6 +11,7 @@ import com.example.daztlmobile.R;
 import com.example.daztlmobile.network.ApiClient;
 import com.example.daztlmobile.network.ApiService;
 import com.example.daztlmobile.network.GrpcClient;
+import com.example.daztlmobile.utils.SessionManager;
 import com.google.android.material.textfield.TextInputEditText;
 import daztl.MusicServiceGrpc;
 import io.grpc.ManagedChannel;
@@ -22,9 +23,16 @@ public class SignupActivity extends AppCompatActivity {
     private Button btnSignup;
     private ApiService api;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        SessionManager session = new SessionManager(this);
+        if (session.fetchToken() != null) {
+            startActivity(new Intent(this, HomeActivity.class));
+            finish();
+            return;
+        }
         setContentView(R.layout.activity_signup);
 
         api = ApiClient.getClient(this).create(ApiService.class);
@@ -78,7 +86,7 @@ public class SignupActivity extends AppCompatActivity {
                 return;
             }
 
-            daztl.DaztlService.RegisterRequest request = daztl.DaztlService.RegisterRequest.newBuilder()
+            daztl.DaztlServiceOuterClass.RegisterRequest request = daztl.DaztlServiceOuterClass.RegisterRequest.newBuilder()
                     .setUsername(username)
                     .setPassword(password)
                     .setEmail(email)
@@ -89,9 +97,9 @@ public class SignupActivity extends AppCompatActivity {
             ManagedChannel channel = GrpcClient.getChannel();
             MusicServiceGrpc.MusicServiceStub stub = MusicServiceGrpc.newStub(channel);
 
-            stub.registerUser(request, new StreamObserver<daztl.DaztlService.GenericResponse>() {
+            stub.registerUser(request, new StreamObserver<daztl.DaztlServiceOuterClass.GenericResponse>() {
                 @Override
-                public void onNext(daztl.DaztlService.GenericResponse response) {
+                public void onNext(daztl.DaztlServiceOuterClass.GenericResponse response) {
                     runOnUiThread(() -> {
                         if (response.getStatus().equalsIgnoreCase("success")) {
                             Toast.makeText(SignupActivity.this, "Cuenta creada con éxito", Toast.LENGTH_SHORT).show();

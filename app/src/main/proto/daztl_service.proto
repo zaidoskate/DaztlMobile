@@ -1,6 +1,9 @@
 syntax = "proto3";
 
 package daztl;
+option java_package = "daztl";
+option java_outer_classname = "DaztlServiceOuterClass";
+
 
 service MusicService {
     rpc RegisterUser (RegisterRequest) returns (GenericResponse);
@@ -26,6 +29,8 @@ service MusicService {
 
     rpc LikeArtist (ArtistIdRequest) returns (GenericResponse);
     rpc IsArtistLiked (ArtistIdRequest) returns (LikeStatusResponse);
+    rpc SearchSongs (SearchRequest) returns (SongListResponse);
+    rpc GetProfile (TokenRequest) returns (UserProfileResponse);
 }
 
 message Empty {}
@@ -63,7 +68,13 @@ message SongResponse {
     int32 id = 1;
     string title = 2;
     string artist = 3;
-    string file_url = 4;
+    string audio_url = 4;
+    string cover_url = 5;
+    string release_date = 6;
+}
+
+message SearchRequest {
+    string query = 1;
 }
 
 message SongListResponse {
@@ -145,6 +156,18 @@ message ArtistIdRequest {
 
 message LikeStatusResponse {
     bool is_liked = 1;
+}
+
+message TokenRequest {
+    string token = 1;
+}
+
+message UserProfileResponse {
+    string username = 1;
+    string email = 2;
+    string first_name = 3;
+    string last_name = 4;
+    string role = 5;
 }
 
 message GenericResponse {

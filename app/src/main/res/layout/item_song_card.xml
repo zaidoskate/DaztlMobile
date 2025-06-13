@@ -10,7 +10,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="725dp"
+        android:layout_height="wrap_content"
         android:background="@color/bg_dark"
         android:gravity="center_vertical"
         android:orientation="horizontal"
@@ -18,10 +18,10 @@
 
         <ImageView
             android:id="@+id/ivCover"
-            android:layout_width="168dp"
-            android:layout_height="165dp"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
             android:scaleType="centerCrop"
-            android:src="@drawable/ic_music_note" />
+            android:contentDescription="@string/song_cover" />
 
         <LinearLayout
             android:layout_width="0dp"

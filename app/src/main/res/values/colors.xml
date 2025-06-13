@@ -4,4 +4,5 @@
     <color name="bg_gray">#2E3338</color>
     <color name="accent_blue">#00D1FF</color>
     <color name="text_white">#FFFFFF</color>
+    <color name="text_gray">#AAAAAA</color>
 </resources>

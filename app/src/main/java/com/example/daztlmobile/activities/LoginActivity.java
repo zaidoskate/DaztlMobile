@@ -15,6 +15,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import daztl.DaztlServiceOuterClass;
 import daztl.MusicServiceGrpc;
 import io.grpc.ManagedChannel;
 import io.grpc.StatusRuntimeException;
@@ -51,21 +52,20 @@ public class LoginActivity extends AppCompatActivity {
 
                     MusicServiceGrpc.MusicServiceBlockingStub stub = MusicServiceGrpc.newBlockingStub(channel);
 
-                    daztl.DaztlService.LoginRequest request = daztl.DaztlService.LoginRequest.newBuilder()
+                    DaztlServiceOuterClass.LoginRequest request = DaztlServiceOuterClass.LoginRequest.newBuilder()
                             .setUsername(email)
                             .setPassword(pass)
                             .build();
 
-                    daztl.DaztlService.LoginResponse response = stub.loginUser(request);
+                    daztl.DaztlServiceOuterClass.LoginResponse response = stub.loginUser(request);
 
                     runOnUiThread(() -> {
                         session.saveToken(response.getAccessToken());
                         Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
                         startActivity(intent);
-                        finish();
+                        channel.shutdown();
                     });
 
-                    channel.shutdown();
 
                 } catch (StatusRuntimeException e) {
                     e.printStackTrace();

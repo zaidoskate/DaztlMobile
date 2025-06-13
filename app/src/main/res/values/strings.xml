@@ -2,7 +2,8 @@
     <string name="app_name">DaztlMobile</string>
     <string name="username">Usuario</string>
     <string name="correo">Correo</string>
-    <string name="contrase_a">Contraseña</string>
-    <string name="login">Iniciar Sesión</string>
+    <string name="contrasena">Contrasena</string>
+    <string name="login">Iniciar Sesion</string>
     <string name="logo_daztl">Logo DAZTL</string>
+    <string name="song_cover">cover_image</string>
 </resources>

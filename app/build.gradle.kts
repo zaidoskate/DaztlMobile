@@ -31,7 +31,6 @@ android {
         targetCompatibility = JavaVersion.VERSION_11
     }
 
-    // Necesario si usás código generado en Java
     sourceSets {
         getByName("main").java.srcDirs(
             "src/main/java",
@@ -79,6 +78,9 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
+    implementation (libs.glide)
+    annotationProcessor (libs.compiler)
+
 
     // gRPC para Android (lite)
     implementation(libs.grpc.okhttp.v1640)
@@ -86,4 +88,15 @@ dependencies {
     implementation(libs.grpc.stub.v1640)
     implementation(libs.javax.annotation.api)
     implementation(libs.protobuf.javalite)
+    implementation (libs.material.v1110)
+    implementation (libs.viewpager2)
+    implementation(libs.transition)
+
 }
+
+configurations.all {
+    resolutionStrategy {
+        force("androidx.transition:transition:1.5.0")
+    }
+}
+
