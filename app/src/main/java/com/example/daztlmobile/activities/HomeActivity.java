@@ -40,6 +40,8 @@ import java.util.concurrent.Executors;
 
 import daztl.DaztlServiceOuterClass;
 import daztl.MusicServiceGrpc;
+import io.grpc.Metadata;
+import io.grpc.stub.MetadataUtils;
 
 public class HomeActivity extends AppCompatActivity implements SongAdapter.OnSongClickListener {
 
@@ -266,8 +268,18 @@ public class HomeActivity extends AppCompatActivity implements SongAdapter.OnSon
     private void searchSongs(String query) {
         executor.execute(() -> {
             try {
+                SessionManager sessionManager = new SessionManager(this);
                 var channel = GrpcClient.getChannel();
-                var stub = MusicServiceGrpc.newBlockingStub(channel);
+                var accessToken = sessionManager.fetchToken();
+
+                Metadata metadata = new Metadata();
+                Metadata.Key<String> AUTHORIZATION_KEY =
+                        Metadata.Key.of("authorization", Metadata.ASCII_STRING_MARSHALLER);
+                metadata.put(AUTHORIZATION_KEY, "Bearer " + accessToken);
+
+                var stub = MusicServiceGrpc.newBlockingStub(channel)
+                        .withInterceptors(MetadataUtils.newAttachHeadersInterceptor(metadata));
+
                 var req = DaztlServiceOuterClass.SearchRequest.newBuilder().setQuery(query).build();
                 var resp = stub.searchSongs(req);
 
@@ -300,6 +312,7 @@ public class HomeActivity extends AppCompatActivity implements SongAdapter.OnSon
             }
         });
     }
+
 
     @Override
     public void onSongClick(Song song) {
