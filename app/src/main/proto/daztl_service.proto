@@ -17,6 +17,8 @@ service MusicService {
 
     rpc CreatePlaylist (CreatePlaylistRequest) returns (GenericResponse);
     rpc GetPlaylist (PlaylistIdRequest) returns (PlaylistResponse);
+    rpc AddSongToPlaylist (AddSongToPlaylistRequest) returns (GenericResponse);
+    rpc GetPlaylistDetail(PlaylistDetailRequest) returns (PlaylistDetailResponse);
 
     rpc UploadSong (UploadSongRequest) returns (GenericResponse);
     rpc UploadAlbum (UploadAlbumRequest) returns (GenericResponse);
@@ -111,10 +113,29 @@ message PlaylistIdRequest {
     int32 id = 1;
 }
 
+message PlaylistDetailRequest {
+    string token = 1;
+    int32 playlist_id = 2;
+}
+
+message PlaylistDetailResponse {
+    int32 id = 1;
+    string name = 2;
+    repeated SongResponse songs = 3;
+    string status = 4;
+    string message = 5;
+}
+
 message PlaylistResponse {
     int32 id = 1;
     string name = 2;
     repeated SongResponse songs = 3;
+}
+
+message AddSongToPlaylistRequest {
+    string token = 1;
+    int32 playlist_id = 2;
+    int32 song_id = 3;
 }
 
 message UploadSongRequest {
@@ -181,3 +202,4 @@ message GenericResponse {
     string status = 1;
     string message = 2;
 }
+

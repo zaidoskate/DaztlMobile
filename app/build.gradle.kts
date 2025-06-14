@@ -92,6 +92,8 @@ dependencies {
     implementation (libs.material.v1110)
     implementation (libs.viewpager2)
     implementation(libs.transition)
+    implementation ("com.google.android.material:material:1.12.0")
+
 
 }
 

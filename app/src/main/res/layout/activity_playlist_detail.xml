@@ -1,0 +1,52 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:background="@color/bg_dark"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/tvPlaylistName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Nombre de la Playlist"
+        android:textColor="@color/text_white"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="12dp" />
+
+    <EditText
+        android:id="@+id/etSearchSongs"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Buscar canciones"
+        android:padding="12dp"
+        android:textColorHint="@color/text_white"
+        android:textColor="@color/text_white" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvSearchResults"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:paddingTop="8dp"
+        android:paddingBottom="12dp" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Canciones en la playlist"
+        android:textColor="@color/text_white"
+        android:textStyle="bold"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="8dp" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvPlaylistSongs"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="3"
+        android:paddingTop="8dp"
+        android:paddingBottom="12dp" />
+
+</LinearLayout>

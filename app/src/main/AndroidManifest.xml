@@ -26,7 +26,9 @@
         <activity android:name=".activities.LoginActivity" android:exported="true" />
         <activity android:name=".activities.HomeActivity" />
         <activity android:name=".activities.ProfileActivity" />
+        <activity android:name=".activities.PlaylistDetailActivity" />
 
+        <service android:name=".services.MusicPlaybackService" />
     </application>
     <uses-permission android:name="android.permission.INTERNET"
         tools:ignore="ManifestOrder" />
