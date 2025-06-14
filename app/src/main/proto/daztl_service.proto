@@ -19,6 +19,7 @@ service MusicService {
     rpc GetPlaylist (PlaylistIdRequest) returns (PlaylistResponse);
     rpc AddSongToPlaylist (AddSongToPlaylistRequest) returns (GenericResponse);
     rpc GetPlaylistDetail(PlaylistDetailRequest) returns (PlaylistDetailResponse);
+    rpc ListPlaylists (PlaylistListRequest) returns (PlaylistListResponse);
 
     rpc UploadSong (UploadSongRequest) returns (GenericResponse);
     rpc UploadAlbum (UploadAlbumRequest) returns (GenericResponse);
@@ -136,6 +137,14 @@ message AddSongToPlaylistRequest {
     string token = 1;
     int32 playlist_id = 2;
     int32 song_id = 3;
+}
+
+message PlaylistListRequest {
+    string token = 1;
+}
+
+message PlaylistListResponse {
+    repeated PlaylistResponse playlists = 1;
 }
 
 message UploadSongRequest {

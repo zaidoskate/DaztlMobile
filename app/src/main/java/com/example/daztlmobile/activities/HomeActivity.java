@@ -50,7 +50,7 @@ public class HomeActivity extends AppCompatActivity implements SongAdapter.OnSon
     private SongAdapter adapter;
     private ExecutorService executor = Executors.newSingleThreadExecutor();
 
-    private ImageButton btnPlayPause, btnNext, btnPrev, btnCreatePlaylist;
+    private ImageButton btnPlayPause, btnNext, btnPrev, btnCreatePlaylist, btnLibrary;
     private SeekBar seekBar;
 
     private MusicPlaybackService musicService;
@@ -111,6 +111,12 @@ public class HomeActivity extends AppCompatActivity implements SongAdapter.OnSon
         rvContent.setAdapter(adapter);
 
         btnCreatePlaylist.setOnClickListener(v -> showCreatePlaylistDialog());
+
+        btnLibrary = findViewById(R.id.btnLibrary);
+        btnLibrary.setOnClickListener(v -> {
+            Intent intent = new Intent(this, LibraryActivity.class);
+            startActivity(intent);
+        });
 
         etSearch.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
