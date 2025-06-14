@@ -30,7 +30,8 @@ service MusicService {
     rpc LikeArtist (ArtistIdRequest) returns (GenericResponse);
     rpc IsArtistLiked (ArtistIdRequest) returns (LikeStatusResponse);
     rpc SearchSongs (SearchRequest) returns (SongListResponse);
-    rpc GetProfile (TokenRequest) returns (UserProfileResponse);
+    rpc GetProfile (Empty) returns (UserProfileResponse);
+    rpc RefreshToken (RefreshTokenRequest) returns (LoginResponse);
 }
 
 message Empty {}
@@ -48,6 +49,8 @@ message UpdateProfileRequest {
     string email = 2;
     string first_name = 3;
     string last_name = 4;
+    string username = 5;
+    string password = 6;
 }
 
 message LoginRequest {
@@ -167,7 +170,11 @@ message UserProfileResponse {
     string email = 2;
     string first_name = 3;
     string last_name = 4;
-    string role = 5;
+    string profile_image_url = 5;
+}
+
+message RefreshTokenRequest {
+    string refresh_token = 1;
 }
 
 message GenericResponse {

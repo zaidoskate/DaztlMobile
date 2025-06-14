@@ -33,31 +33,67 @@
                 android:layout_width="120dp"
                 android:layout_height="120dp"
                 android:scaleType="centerCrop"
-                android:contentDescription="Foto de perfil" />
+                android:contentDescription="Foto de perfil"
+                android:src="@drawable/ic_default_profile" />
 
-            <TextView
-                android:id="@+id/tvUsername"
-                android:layout_width="wrap_content"
+            <EditText
+                android:id="@+id/etFirstName"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:hint="Nombre"
                 android:textColor="@color/text_white"
-                android:textSize="18sp"
-                android:layout_marginTop="16dp" />
+                android:textColorHint="@color/text_gray"
+                android:layout_marginTop="8dp"
+                android:backgroundTint="@color/text_gray"/>
 
-            <TextView
-                android:id="@+id/tvFullName"
+            <EditText
+                android:id="@+id/etLastName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Apellido"
+                android:textColor="@color/text_white"
+                android:textColorHint="@color/text_gray"
+                android:layout_marginTop="8dp"
+                android:backgroundTint="@color/text_gray"/>
+
+
+            <EditText
+                android:id="@+id/etUsername"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Nombre de usuario"
+                android:textColor="@color/text_white"
+                android:textColorHint="@color/text_gray"
+                android:layout_marginTop="16dp"
+                android:backgroundTint="@color/text_gray"/>
+
+            <EditText
+                android:id="@+id/etEmail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Correo electrónico"
+                android:textColor="@color/text_white"
+                android:textColorHint="@color/text_gray"
+                android:layout_marginTop="8dp"
+                android:backgroundTint="@color/text_gray"/>
+
+            <EditText
+                android:id="@+id/etPassword"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Nueva contraseña"
+                android:textColor="@color/text_white"
+                android:textColorHint="@color/text_gray"
+                android:inputType="textPassword"
+                android:layout_marginTop="8dp"
+                android:backgroundTint="@color/text_gray"/>
+
+            <Button
+                android:id="@+id/btnSaveChanges"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textColor="@color/text_gray"
-                android:textSize="16sp"
-                android:layout_marginTop="4dp" />
-
-            <TextView
-                android:id="@+id/tvEmail"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="@color/text_gray"
-                android:textSize="16sp"
-                android:layout_marginTop="4dp" />
+                android:text="Guardar cambios"
+                android:layout_marginTop="24dp"/>
 
         </LinearLayout>
     </ScrollView>

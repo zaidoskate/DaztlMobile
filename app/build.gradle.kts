@@ -86,6 +86,7 @@ dependencies {
     implementation(libs.grpc.okhttp.v1640)
     implementation(libs.grpc.protobuf.lite.v1640)
     implementation(libs.grpc.stub.v1640)
+    implementation (libs.grpc.stub.v1572)
     implementation(libs.javax.annotation.api)
     implementation(libs.protobuf.javalite)
     implementation (libs.material.v1110)

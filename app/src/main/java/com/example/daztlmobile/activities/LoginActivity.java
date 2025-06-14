@@ -60,7 +60,7 @@ public class LoginActivity extends AppCompatActivity {
                     daztl.DaztlServiceOuterClass.LoginResponse response = stub.loginUser(request);
 
                     runOnUiThread(() -> {
-                        session.saveToken(response.getAccessToken());
+                        session.saveTokens(response.getAccessToken(), response.getRefreshToken());
                         Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
                         startActivity(intent);
                         channel.shutdown();

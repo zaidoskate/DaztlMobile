@@ -6,6 +6,7 @@ grpcOkhttp = "1.63.0"
 grpcOkhttpVersion = "1.64.0"
 grpcProtobufLite = "1.64.0"
 grpcStub = "1.64.0"
+grpcStubVersion = "1.57.2"
 javaxAnnotationApi = "1.3.2"
 junit = "4.13.2"
 junitVersion = "1.2.1"
@@ -30,6 +31,7 @@ grpc-okhttp = { module = "io.grpc:grpc-okhttp", version.ref = "grpcOkhttp" }
 grpc-okhttp-v1640 = { module = "io.grpc:grpc-okhttp", version.ref = "grpcOkhttpVersion" }
 grpc-protobuf-lite = { module = "io.grpc:grpc-protobuf-lite", version.ref = "grpcOkhttp" }
 grpc-protobuf-lite-v1640 = { module = "io.grpc:grpc-protobuf-lite", version.ref = "grpcProtobufLite" }
+grpc-stub-v1572 = { module = "io.grpc:grpc-stub", version.ref = "grpcStubVersion" }
 grpc-stub-v1640 = { module = "io.grpc:grpc-stub", version.ref = "grpcStub" }
 javax-annotation-api = { module = "javax.annotation:javax.annotation-api", version.ref = "javaxAnnotationApi" }
 grpc-stub = { module = "io.grpc:grpc-stub", version.ref = "grpcOkhttp" }
