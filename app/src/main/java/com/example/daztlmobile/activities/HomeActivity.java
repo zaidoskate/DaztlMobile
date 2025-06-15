@@ -16,6 +16,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.SeekBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -46,6 +47,7 @@ import io.grpc.stub.MetadataUtils;
 public class HomeActivity extends AppCompatActivity implements SongAdapter.OnSongClickListener {
 
     private EditText etSearch;
+    private TextView tvContentName;
     private RecyclerView rvContent;
     private SongAdapter adapter;
     private ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -57,7 +59,7 @@ public class HomeActivity extends AppCompatActivity implements SongAdapter.OnSon
     private boolean bound = false;
 
     private Handler handler = new Handler();
-    private Runnable updateSeekBarRunnable;
+    private Runnable updateSeekBarRunnable, searchRunnable;
 
     private List<Song> songList = new ArrayList<>();
 
@@ -99,6 +101,7 @@ public class HomeActivity extends AppCompatActivity implements SongAdapter.OnSon
         setSupportActionBar(toolbar);
 
         etSearch = findViewById(R.id.etSearch);
+        tvContentName = findViewById(R.id.tvContentName);
         rvContent = findViewById(R.id.rvContent);
         btnPlayPause = findViewById(R.id.btnPlayPause);
         btnNext = findViewById(R.id.btnNext);
@@ -120,13 +123,20 @@ public class HomeActivity extends AppCompatActivity implements SongAdapter.OnSon
 
         etSearch.addTextChangedListener(new TextWatcher() {
             @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
             @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
+
             @Override
             public void afterTextChanged(Editable s) {
-                String query = s.toString();
-                if (query.length() > 2) {
-                    searchSongs(query);
-                } else if (query.isEmpty()) {
+                String query = s.toString().trim();
+                if (searchRunnable != null) {
+                    handler.removeCallbacks(searchRunnable);
+                }
+
+                if (!query.isEmpty()) {
+                    searchRunnable = () -> searchSongs(query);
+                    handler.postDelayed(searchRunnable, 1000);
+                } else {
                     loadAllSongs();
                 }
             }
@@ -185,12 +195,12 @@ public class HomeActivity extends AppCompatActivity implements SongAdapter.OnSon
     @Override
     protected void onStop() {
         super.onStop();
-        if (bound) {
+        if (bound && musicService != null && !musicService.isPlaying()) {
             unbindService(serviceConnection);
             bound = false;
         }
-        stopSeekBarUpdate();
     }
+
 
     @Override
     protected void onDestroy() {
@@ -237,6 +247,7 @@ public class HomeActivity extends AppCompatActivity implements SongAdapter.OnSon
     }
 
     private void loadAllSongs() {
+        tvContentName.setText("Catálogo");
         executor.execute(() -> {
             try {
                 var channel = GrpcClient.getChannel();
@@ -272,6 +283,7 @@ public class HomeActivity extends AppCompatActivity implements SongAdapter.OnSon
     }
 
     private void searchSongs(String query) {
+        tvContentName.setText("Búsqueda");
         executor.execute(() -> {
             try {
                 SessionManager sessionManager = new SessionManager(this);
