@@ -9,6 +9,7 @@ service MusicService {
     rpc RegisterUser (RegisterRequest) returns (GenericResponse);
     rpc UpdateProfile (UpdateProfileRequest) returns (GenericResponse);
     rpc LoginUser (LoginRequest) returns (LoginResponse);
+    rpc RegisterArtist(RegisterArtistRequest) returns (GenericResponse);
 
     rpc ListSongs (Empty) returns (SongListResponse);
     rpc GetSong (SongIdRequest) returns (SongResponse);
@@ -47,6 +48,15 @@ message RegisterRequest {
     string last_name = 5;
 }
 
+message RegisterArtistRequest {
+    string username = 1;
+    string email = 2;
+    string password = 3;
+    string first_name = 4;
+    string last_name = 5;
+    string bio = 6;
+}
+
 message UpdateProfileRequest {
     string token = 1;
     string email = 2;
@@ -64,6 +74,11 @@ message LoginRequest {
 message LoginResponse {
     string access_token = 1;
     string refresh_token = 2;
+    string role = 3;
+    bool is_artist = 4;
+    int32 user_id = 5;
+    string username =6;
+    int32 artist_id = 7;
 }
 
 message SongIdRequest {
@@ -211,4 +226,3 @@ message GenericResponse {
     string status = 1;
     string message = 2;
 }
-
