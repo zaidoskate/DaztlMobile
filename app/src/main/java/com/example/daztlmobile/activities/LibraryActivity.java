@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.daztlmobile.R;
 import com.example.daztlmobile.adapters.PlaylistAdapter;
+import com.example.daztlmobile.models.Playlist;
 import com.example.daztlmobile.network.GrpcClient;
 import com.example.daztlmobile.utils.SessionManager;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -37,8 +38,7 @@ public class LibraryActivity extends AppCompatActivity {
 
         rvPlaylists = findViewById(R.id.rvPlaylists);
         rvPlaylists.setLayoutManager(new LinearLayoutManager(this));
-        playlistAdapter = new PlaylistAdapter(playlistList, playlist -> {
-            // Al hacer click en playlist -> abrir detalle
+        /*playlistAdapter = new PlaylistAdapter(playlistList, playlist -> {
             Intent intent = new Intent(LibraryActivity.this, PlaylistDetailActivity.class);
             intent.putExtra("playlist_id", playlist.getId());
             intent.putExtra("playlist_name", playlist.getName());
@@ -46,11 +46,11 @@ public class LibraryActivity extends AppCompatActivity {
         });
         rvPlaylists.setAdapter(playlistAdapter);
 
-        loadUserPlaylists();
+        loadUserPlaylists();*/
     }
 
     private void loadUserPlaylists() {
-        Executors.newSingleThreadExecutor().execute(() -> {
+        /*Executors.newSingleThreadExecutor().execute(() -> {
             try {
                 SessionManager sessionManager = new SessionManager(this);
                 var channel = GrpcClient.getChannel();
@@ -65,7 +65,7 @@ public class LibraryActivity extends AppCompatActivity {
 
                 List<Playlist> playlists = new ArrayList<>();
                 for (var pl : response.getPlaylistsList()) {
-                    Playlist playlist = new Playlist(pl.getId(), pl.getName());
+                    Playlist playlist = new Playlist(pl.getId(), pl.getName(), pl.getCoverUrl(), pl.get);
                     playlists.add(playlist);
                 }
 
@@ -79,23 +79,6 @@ public class LibraryActivity extends AppCompatActivity {
                 e.printStackTrace();
                 runOnUiThread(() -> Toast.makeText(this, "Error al cargar playlists", Toast.LENGTH_SHORT).show());
             }
-        });
-    }
-    public static class Playlist {
-        private final int id;
-        private final String name;
-
-        public Playlist(int id, String name) {
-            this.id = id;
-            this.name = name;
-        }
-
-        public int getId() {
-            return id;
-        }
-
-        public String getName() {
-            return name;
-        }
+        });*/
     }
 }

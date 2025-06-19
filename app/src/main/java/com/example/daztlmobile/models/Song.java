@@ -17,4 +17,8 @@ public class Song {
     public String getFullCoverUrl() {
         return coverUrl.replace("localhost", "10.0.2.2");
     }
+
+    public void setFullCoverUrl(String url){
+        this.coverUrl = url.replace("localhost", "10.0.2.2");
+    }
 }

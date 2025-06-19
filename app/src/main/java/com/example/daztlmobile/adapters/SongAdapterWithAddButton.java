@@ -19,26 +19,22 @@ import java.util.List;
 
 public class SongAdapterWithAddButton extends RecyclerView.Adapter<SongAdapterWithAddButton.SongViewHolder> {
 
-    public interface OnAddClickListener {
-        void onAddClick(Song song);
+    public interface OnAddButtonClickListener {
+        void onAddButtonClick(Song song);
     }
 
     private List<Song> songs = new ArrayList<>();
-    private final OnAddClickListener listener;
+    private final OnAddButtonClickListener listener;
 
-    public SongAdapterWithAddButton(OnAddClickListener listener) {
+    public SongAdapterWithAddButton(OnAddButtonClickListener listener) {
         this.listener = listener;
-    }
-
-    public void setSongs(List<Song> songs) {
-        this.songs = songs;
-        notifyDataSetChanged();
     }
 
     @NonNull
     @Override
     public SongViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_song_with_add, parent, false);
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_song_with_add, parent, false);
         return new SongViewHolder(view);
     }
 
@@ -47,8 +43,15 @@ public class SongAdapterWithAddButton extends RecyclerView.Adapter<SongAdapterWi
         Song song = songs.get(position);
         holder.tvTitle.setText(song.title);
         holder.tvArtist.setText(song.artistName);
-        Glide.with(holder.itemView.getContext()).load(song.getFullCoverUrl()).into(holder.ivCover);
-        holder.btnAdd.setOnClickListener(v -> listener.onAddClick(song));
+
+        if (song.coverUrl != null && !song.coverUrl.isEmpty()) {
+            Glide.with(holder.itemView.getContext())
+                    .load(song.coverUrl)
+                    .placeholder(R.drawable.ic_music_note)
+                    .into(holder.ivCover);
+        }
+
+        holder.btnAdd.setOnClickListener(v -> listener.onAddButtonClick(song));
     }
 
     @Override
@@ -56,12 +59,18 @@ public class SongAdapterWithAddButton extends RecyclerView.Adapter<SongAdapterWi
         return songs.size();
     }
 
+    public void setSongs(List<Song> songs) {
+        this.songs = songs;
+        notifyDataSetChanged();
+    }
+
     static class SongViewHolder extends RecyclerView.ViewHolder {
         ImageView ivCover;
-        TextView tvTitle, tvArtist;
+        TextView tvTitle;
+        TextView tvArtist;
         ImageButton btnAdd;
 
-        SongViewHolder(@NonNull View itemView) {
+        public SongViewHolder(@NonNull View itemView) {
             super(itemView);
             ivCover = itemView.findViewById(R.id.ivCover);
             tvTitle = itemView.findViewById(R.id.tvTitle);

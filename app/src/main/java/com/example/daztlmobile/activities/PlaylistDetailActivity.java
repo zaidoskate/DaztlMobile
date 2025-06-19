@@ -1,12 +1,20 @@
 package com.example.daztlmobile.activities;
 
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.util.Log;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -14,6 +22,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.daztlmobile.R;
 import com.example.daztlmobile.adapters.SongAdapter;
 import com.example.daztlmobile.adapters.SongAdapterWithAddButton;
@@ -22,31 +31,67 @@ import com.example.daztlmobile.network.GrpcClient;
 import com.example.daztlmobile.services.MusicPlaybackService;
 import com.example.daztlmobile.utils.SessionManager;
 import com.example.daztlmobile.utils.SimpleTextWatcher;
+import com.google.android.material.appbar.MaterialToolbar;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import daztl.DaztlServiceOuterClass;
 import daztl.MusicServiceGrpc;
 
-public class PlaylistDetailActivity extends AppCompatActivity {
+public class PlaylistDetailActivity extends AppCompatActivity
+        implements SongAdapterWithAddButton.OnAddButtonClickListener, SongAdapter.OnSongClickListener {
 
+    private ImageView ivPlaylistCover;
     private TextView tvPlaylistName;
-    private EditText etSearch;
-    private RecyclerView rvSongs;
-    private SongAdapterWithAddButton adapter;
-
+    private TextView tvSongCount;
+    private EditText etSearchSongs;
     private RecyclerView rvPlaylistSongs;
-    private SongAdapter adapterPlaylistSongs;
+    private RecyclerView rvAvailableSongs;
 
-    private List<Song> allSongs = new ArrayList<>();
+    private SongAdapter playlistSongsAdapter;
+    private SongAdapterWithAddButton availableSongsAdapter;
+
     private List<Song> playlistSongs = new ArrayList<>();
+    private List<Song> allSongs = new ArrayList<>();
 
-    private String playlistName;
     private int playlistId;
+    private String playlistName;
+    private String playlistCoverUrl;
+
+    private ExecutorService executor = Executors.newFixedThreadPool(2);
 
     private MusicPlaybackService musicService;
     private boolean bound = false;
+
+    private ImageButton btnPlayPause, btnNext, btnPrev;
+    private SeekBar seekBar;
+    private Handler handler = new Handler();
+    private Runnable updateSeekBarRunnable;
+    private BroadcastReceiver playbackReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (MusicPlaybackService.ACTION_PLAYBACK_STATUS.equals(intent.getAction())) {
+                Log.d("Playback", "Recibido broadcast de estado de reproducción");
+                runOnUiThread(() -> {
+                    try {
+                        if (bound && musicService != null) {
+                            updateUIState();
+                            if (musicService.isPlaying()) {
+                                startSeekBarUpdate();
+                            } else {
+                                stopSeekBarUpdate();
+                            }
+                        }
+                    } catch (Exception e) {
+                        Log.e("Playback", "Error en onReceive", e);
+                    }
+                });
+            }
+        }
+    };
 
     private final ServiceConnection connection = new ServiceConnection() {
         @Override
@@ -55,13 +100,26 @@ public class PlaylistDetailActivity extends AppCompatActivity {
             musicService = binder.getService();
             bound = true;
 
-            musicService.setPlaylist(playlistSongs);
+            musicService.setOnPlaybackPreparedListener(() -> runOnUiThread(() -> {
+                updateUIState();
+                startSeekBarUpdate();
+            }));
+
+            if (musicService.isPlaying()) {
+                updateUIState();
+                startSeekBarUpdate();
+            }
+
+            if (!playlistSongs.isEmpty()) {
+                musicService.setPlaylist(playlistSongs);
+            }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
             bound = false;
             musicService = null;
+            handler.removeCallbacks(updateSeekBarRunnable);
         }
     };
 
@@ -70,168 +128,370 @@ public class PlaylistDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_playlist_detail);
 
-        // Recibir datos de la playlist
-        playlistName = getIntent().getStringExtra("playlist_name");
         playlistId = getIntent().getIntExtra("playlist_id", -1);
+        playlistName = getIntent().getStringExtra("playlist_name");
+        playlistCoverUrl = getIntent().getStringExtra("playlist_cover_url");
 
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        toolbar.setNavigationOnClickListener(v -> onBackPressed());
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setTitle(playlistName);
+        }
+
+        initViews();
+        setupPlaybackControls();
+        setupAdapters();
+        loadPlaylistDetails();
+        loadAllSongs();
+        Intent serviceIntent = new Intent(this, MusicPlaybackService.class);
+        bindService(serviceIntent, connection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        IntentFilter filter = new IntentFilter(MusicPlaybackService.ACTION_PLAYBACK_STATUS);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(playbackReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+        }
+
+        Intent serviceIntent = new Intent(this, MusicPlaybackService.class);
+        bindService(serviceIntent, connection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        try {
+            unregisterReceiver(playbackReceiver);
+        } catch (IllegalArgumentException e) {
+            Log.e("PlaylistDetail", "Receiver not registered", e);
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (bound && musicService != null && !musicService.isPlaying()) {
+            unbindService(connection);
+            bound = false;
+        }
+    }
+
+    private void initViews() {
+        ivPlaylistCover = findViewById(R.id.ivPlaylistCover);
         tvPlaylistName = findViewById(R.id.tvPlaylistName);
-        etSearch = findViewById(R.id.etSearchSongs);
-        rvSongs = findViewById(R.id.rvSearchResults);
+        tvSongCount = findViewById(R.id.tvSongCount);
         rvPlaylistSongs = findViewById(R.id.rvPlaylistSongs);
+        rvAvailableSongs = findViewById(R.id.rvAvailableSongs);
+        btnPlayPause = findViewById(R.id.btnPlayPause);
+        btnNext = findViewById(R.id.btnNext);
+        btnPrev = findViewById(R.id.btnPrev);
+        seekBar = findViewById(R.id.seekBar);
+
+        if (playlistCoverUrl != null && !playlistCoverUrl.isEmpty()) {
+            Glide.with(this)
+                    .load(playlistCoverUrl)
+                    .placeholder(R.drawable.ic_music_note)
+                    .into(ivPlaylistCover);
+        }
 
         tvPlaylistName.setText(playlistName);
+    }
 
-        adapter = new SongAdapterWithAddButton(this::onAddSongClicked);
-        rvSongs.setLayoutManager(new LinearLayoutManager(this));
-        rvSongs.setAdapter(adapter);
-
-        adapterPlaylistSongs = new SongAdapter(song -> {
+    private void setupAdapters() {
+        playlistSongsAdapter = new SongAdapter(song -> {
             if (bound && musicService != null) {
+                musicService.setPlaylist(playlistSongs);
                 int index = playlistSongs.indexOf(song);
                 if (index != -1) {
-                    musicService.setPlaylist(playlistSongs);
                     musicService.playSong(index);
                 }
             }
         });
         rvPlaylistSongs.setLayoutManager(new LinearLayoutManager(this));
-        rvPlaylistSongs.setAdapter(adapterPlaylistSongs);
+        rvPlaylistSongs.setAdapter(playlistSongsAdapter);
 
-        loadAllSongs();
-        loadPlaylistSongs();
+        availableSongsAdapter = new SongAdapterWithAddButton(this);
+        rvAvailableSongs.setLayoutManager(new LinearLayoutManager(this));
+        rvAvailableSongs.setAdapter(availableSongsAdapter);
 
-        etSearch.addTextChangedListener(new SimpleTextWatcher() {
+        etSearchSongs = findViewById(R.id.etSearchSongs);
+        etSearchSongs.addTextChangedListener(new SimpleTextWatcher() {
             @Override
             public void afterTextChanged(android.text.Editable s) {
-                filterSongs(s.toString());
+                filterAvailableSongs(s.toString());
+            }
+        });
+    }
+
+    private void setupPlaybackControls() {
+        btnPlayPause.setOnClickListener(v -> {
+            if (!bound || musicService == null) {
+                Toast.makeText(this, "Servicio no disponible", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            try {
+                if (musicService.isPlaying()) {
+                    musicService.pause();
+                    btnPlayPause.setImageResource(R.drawable.ic_play);
+                    stopSeekBarUpdate();
+                } else {
+                    if (musicService.getCurrentSong() == null && !playlistSongs.isEmpty()) {
+                        musicService.setPlaylist(playlistSongs);
+                        musicService.playSong(0);
+                    }
+                    musicService.resume();
+                    btnPlayPause.setImageResource(R.drawable.ic_pause);
+                    startSeekBarUpdate();
+                }
+            } catch (Exception e) {
+                Log.e("Playback", "Error en controles", e);
+                Toast.makeText(this, "Error al reproducir", Toast.LENGTH_SHORT).show();
             }
         });
 
-        Intent intent = new Intent(this, MusicPlaybackService.class);
-        bindService(intent, connection, Context.BIND_AUTO_CREATE);
-    }
+        btnNext.setOnClickListener(v -> {
+            if (!bound || musicService == null) return;
+            musicService.playNext();
+            updateUIState();
+            startSeekBarUpdate();
+        });
 
-    private void loadAllSongs() {
-        new Thread(() -> {
-            try {
-                var stub = MusicServiceGrpc.newBlockingStub(GrpcClient.getChannel());
-                var response = stub.listSongs(DaztlServiceOuterClass.Empty.newBuilder().build());
+        btnPrev.setOnClickListener(v -> {
+            if (!bound || musicService == null) return;
+            musicService.playPrev();
+            updateUIState();
+            startSeekBarUpdate();
+        });
 
-                allSongs.clear();
-                for (var sr : response.getSongsList()) {
-                    Song s = new Song();
-                    s.id = sr.getId();
-                    s.title = sr.getTitle();
-                    s.artistName = sr.getArtist();
-                    s.audioUrl = sr.getAudioUrl();
-                    s.coverUrl = sr.getCoverUrl();
-                    s.releaseDate = sr.getReleaseDate();
-                    allSongs.add(s);
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (!bound || musicService == null) return;
+                if (fromUser) {
+                    musicService.seekTo(progress);
+                    updateUIState();
                 }
-
-                runOnUiThread(() -> adapter.setSongs(allSongs));
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                runOnUiThread(() -> Toast.makeText(this, "Error cargando canciones", Toast.LENGTH_SHORT).show());
             }
-        }).start();
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {}
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {}
+        });
     }
 
-    private void loadPlaylistSongs() {
-        new Thread(() -> {
+    @Override
+    public void onSongClick(Song song) {
+        if (!bound || musicService == null) {
+            return;
+        }
+
+        if (!playlistSongs.contains(song)) {
+            Log.e("Playback", "Canción no encontrada en la playlist");
+            return;
+        }
+
+        musicService.setOnPlaybackPreparedListener(() -> runOnUiThread(() -> {
+            updateUIState();
+            startSeekBarUpdate();
+        }));
+
+        musicService.setPlaylist(playlistSongs);
+        int index = playlistSongs.indexOf(song);
+        musicService.playSong(index);
+
+        updateUIState();
+        startSeekBarUpdate();
+    }
+
+    private void updateUIState() {
+        if (!bound || musicService == null) {
+            return;
+        }
+
+        Song current = musicService.getCurrentSong();
+        if (current != null) {
+            int pos = musicService.getCurrentPosition();
+            int dur = musicService.getDuration();
+
+            seekBar.setMax(dur);
+            seekBar.setProgress(pos);
+
+            btnPlayPause.setImageResource(musicService.isPlaying()
+                    ? R.drawable.ic_pause
+                    : R.drawable.ic_play);
+        } else {
+            seekBar.setProgress(0);
+            btnPlayPause.setImageResource(R.drawable.ic_play);
+        }
+    }
+
+    private void startSeekBarUpdate() {
+        stopSeekBarUpdate();
+        updateSeekBarRunnable = new Runnable() {
+            @Override
+            public void run() {
+                if (bound && musicService != null && musicService.isPlaying()) {
+                    int pos = musicService.getCurrentPosition();
+                    seekBar.setProgress(pos);
+                    handler.postDelayed(this, 500);
+                }
+            }
+        };
+        handler.post(updateSeekBarRunnable);
+    }
+
+    private void stopSeekBarUpdate() {
+        if (updateSeekBarRunnable != null) {
+            handler.removeCallbacks(updateSeekBarRunnable);
+        }
+    }
+
+    private void loadPlaylistDetails() {
+        executor.execute(() -> {
             try {
                 SessionManager sessionManager = new SessionManager(this);
                 String token = sessionManager.fetchToken();
 
-                var stub = MusicServiceGrpc.newBlockingStub(GrpcClient.getChannel());
                 var request = DaztlServiceOuterClass.PlaylistDetailRequest.newBuilder()
                         .setToken(token)
                         .setPlaylistId(playlistId)
                         .build();
 
-                var response = stub.getPlaylistDetail(request);
+                var response = MusicServiceGrpc.newBlockingStub(GrpcClient.getChannel())
+                        .getPlaylistDetail(request);
 
-                if (response.getStatus().equalsIgnoreCase("success")) {
+                if (response.getStatus().equals("success")) {
                     playlistSongs.clear();
                     for (var sr : response.getSongsList()) {
-                        Song s = new Song();
-                        s.id = sr.getId();
-                        s.title = sr.getTitle();
-                        s.artistName = sr.getArtist();
-                        s.audioUrl = sr.getAudioUrl();
-                        s.coverUrl = sr.getCoverUrl();
-                        s.releaseDate = sr.getReleaseDate();
-                        playlistSongs.add(s);
+                        Song song = new Song();
+                        song.id = sr.getId();
+                        song.title = sr.getTitle();
+                        song.artistName = sr.getArtist();
+                        song.audioUrl = sr.getAudioUrl();
+                        song.coverUrl = sr.getCoverUrl();
+                        song.releaseDate = sr.getReleaseDate();
+                        playlistSongs.add(song);
                     }
 
                     runOnUiThread(() -> {
-                        adapterPlaylistSongs.setSongs(playlistSongs);
+                        playlistSongsAdapter.setSongs(playlistSongs);
+                        tvSongCount.setText(getString(R.string.song_count, playlistSongs.size()));
+
                         if (bound && musicService != null) {
                             musicService.setPlaylist(playlistSongs);
                         }
                     });
-
                 } else {
-                    runOnUiThread(() -> Toast.makeText(this, "Error: " + response.getMessage(), Toast.LENGTH_SHORT).show());
+                    runOnUiThread(() ->
+                            Toast.makeText(this, "Error: " + response.getMessage(), Toast.LENGTH_SHORT).show());
                 }
             } catch (Exception e) {
                 e.printStackTrace();
-                runOnUiThread(() -> Toast.makeText(this, "Error cargando playlist", Toast.LENGTH_SHORT).show());
+                runOnUiThread(() ->
+                        Toast.makeText(this, "Error cargando playlist", Toast.LENGTH_SHORT).show());
             }
-        }).start();
+        });
     }
 
-    private void filterSongs(String query) {
+    private void loadAllSongs() {
+        executor.execute(() -> {
+            try {
+                var response = MusicServiceGrpc.newBlockingStub(GrpcClient.getChannel())
+                        .listSongs(DaztlServiceOuterClass.Empty.newBuilder().build());
+
+                allSongs.clear();
+                for (var sr : response.getSongsList()) {
+                    Song song = new Song();
+                    song.id = sr.getId();
+                    song.title = sr.getTitle();
+                    song.artistName = sr.getArtist();
+                    song.audioUrl = sr.getAudioUrl();
+                    song.setFullCoverUrl(sr.getCoverUrl());
+                    song.releaseDate = sr.getReleaseDate();
+                    allSongs.add(song);
+                }
+
+                runOnUiThread(() -> {
+                    availableSongsAdapter.setSongs(allSongs);
+                    filterAvailableSongs(""); // Mostrar todas inicialmente
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+                runOnUiThread(() ->
+                        Toast.makeText(this, "Error cargando canciones", Toast.LENGTH_SHORT).show());
+            }
+        });
+    }
+
+    private void filterAvailableSongs(String query) {
         List<Song> filtered = new ArrayList<>();
         for (Song song : allSongs) {
-            if (song.title.toLowerCase().contains(query.toLowerCase()) ||
-                    song.artistName.toLowerCase().contains(query.toLowerCase())) {
+            boolean isInPlaylist = false;
+            for (Song playlistSong : playlistSongs) {
+                if (playlistSong.id == song.id) {
+                    isInPlaylist = true;
+                    break;
+                }
+            }
+
+            if (!isInPlaylist &&
+                    (song.title.toLowerCase().contains(query.toLowerCase()) ||
+                            song.artistName.toLowerCase().contains(query.toLowerCase()))) {
                 filtered.add(song);
             }
         }
-        adapter.setSongs(filtered);
+        availableSongsAdapter.setSongs(filtered);
     }
 
-    private void onAddSongClicked(Song song) {
-        if (playlistId == -1) {
-            Toast.makeText(this, "ID de playlist inválido", Toast.LENGTH_SHORT).show();
-            return;
-        }
+    @Override
+    public void onAddButtonClick(Song song) {
+        addSongToPlaylist(song);
+    }
 
-        SessionManager sessionManager = new SessionManager(this);
-        String token = sessionManager.fetchToken();
-
-        DaztlServiceOuterClass.AddSongToPlaylistRequest request = DaztlServiceOuterClass
-                .AddSongToPlaylistRequest.newBuilder()
-                .setToken(token)
-                .setPlaylistId(playlistId)
-                .setSongId(song.id)
-                .build();
-
-        new Thread(() -> {
+    private void addSongToPlaylist(Song song) {
+        executor.execute(() -> {
             try {
-                var stub = MusicServiceGrpc.newBlockingStub(GrpcClient.getChannel());
-                var response = stub.addSongToPlaylist(request);
+                SessionManager sessionManager = new SessionManager(this);
+                String token = sessionManager.fetchToken();
+
+                var request = DaztlServiceOuterClass.AddSongToPlaylistRequest.newBuilder()
+                        .setToken(token)
+                        .setPlaylistId(playlistId)
+                        .setSongId(song.id)
+                        .build();
+
+                var response = MusicServiceGrpc.newBlockingStub(GrpcClient.getChannel())
+                        .addSongToPlaylist(request);
 
                 runOnUiThread(() -> {
-                    if (response.getStatus().equalsIgnoreCase("success")) {
-                        Toast.makeText(this, "Agregado: " + song.title, Toast.LENGTH_SHORT).show();
-                        loadPlaylistSongs();
+                    if (response.getStatus().equals("success")) {
+                        Toast.makeText(this,
+                                "Canción agregada: " + song.title, Toast.LENGTH_SHORT).show();
+                        loadPlaylistDetails();
+                        filterAvailableSongs("");
                     } else {
-                        Toast.makeText(this, "Error: " + response.getMessage(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this,
+                                "Error: " + response.getMessage(), Toast.LENGTH_SHORT).show();
                     }
                 });
-
             } catch (Exception e) {
-                runOnUiThread(() -> Toast.makeText(this, "Error: " + e.getMessage(), Toast.LENGTH_LONG).show());
+                e.printStackTrace();
+                runOnUiThread(() ->
+                        Toast.makeText(this, "Error agregando canción", Toast.LENGTH_SHORT).show());
             }
-        }).start();
+        });
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        executor.shutdownNow();
         if (bound) {
             unbindService(connection);
             bound = false;

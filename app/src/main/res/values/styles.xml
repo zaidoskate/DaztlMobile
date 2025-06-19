@@ -7,4 +7,13 @@
         <item name="colorSecondary">@color/accent_blue</item>
         <item name="colorOnSecondary">@color/bg_dark</item>
     </style>
+    <style name="FullScreenDialog" parent="ThemeOverlay.MaterialComponents.Dialog.Alert">
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">false</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:backgroundDimAmount">0.5</item>
+    </style>
 </resources>

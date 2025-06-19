@@ -7,6 +7,21 @@
     android:gravity="center"
     android:background="@color/bg_dark">
 
+    <ImageView
+        android:id="@+id/ivCoverPreview"
+        android:layout_width="120dp"
+        android:layout_height="120dp"
+        android:scaleType="centerCrop"
+        android:background="@color/bg_darker"
+        android:layout_marginBottom="16dp"/>
+
+    <Button
+        android:id="@+id/btnSelectImage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Seleccionar imagen"
+        android:layout_marginBottom="16dp"/>
+
     <EditText
         android:id="@+id/etPlaylistName"
         android:layout_width="match_parent"

@@ -7,7 +7,7 @@ import com.example.daztlmobile.models.LoginResponse;
 import com.example.daztlmobile.models.UserResponse;
 import com.example.daztlmobile.models.Song;
 import com.example.daztlmobile.models.Album;
-import com.example.daztlmobile.models.ArtistProfile;
+import com.example.daztlmobile.models.Artist;
 import com.example.daztlmobile.models.Playlist;
 import com.example.daztlmobile.models.LikeStatusResponse;
 
@@ -42,7 +42,7 @@ public interface ApiService {
     Call<List<Album>> getAlbums(@Query("q") String query);
 
     @GET("artists/")
-    Call<List<ArtistProfile>> getArtists(@Query("q") String query);
+    Call<List<Artist>> getArtists(@Query("q") String query);
 
     // — CU-05/06/07 Playlists (si luego lo implementas)
     @GET("playlists/")

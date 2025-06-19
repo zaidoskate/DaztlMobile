@@ -13,9 +13,10 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:background="@color/bg_darker"
-        app:title="Playlist"
+        app:title="Álbum"
         app:titleTextColor="@color/text_white"
-        app:tint="@color/text_white"/>
+        app:tint="@color/text_white"
+        />
 
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
@@ -30,19 +31,16 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <!-- Header de la playlist -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:layout_marginBottom="24dp">
-
                 <ImageView
-                    android:id="@+id/ivPlaylistCover"
+                    android:id="@+id/ivAlbumCover"
                     android:layout_width="150dp"
                     android:layout_height="150dp"
                     android:scaleType="centerCrop"/>
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -51,82 +49,53 @@
                     android:gravity="center_vertical">
 
                     <TextView
-                        android:id="@+id/tvPlaylistName"
+                        android:id="@+id/tvAlbumTitle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:textColor="@color/text_white"
                         android:textSize="20sp"
                         android:textStyle="bold"
-                        tools:text="Nombre de la playlist"/>
+                        tools:text="Nombre del Álbum" />
 
                     <TextView
-                        android:id="@+id/tvSongCount"
+                        android:id="@+id/tvArtistName"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:textColor="@color/text_gray"
+                        android:textSize="16sp"
+                        tools:text="Nombre del Artista" />
+
+                    <TextView
+                        android:id="@+id/tvReleaseDate"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="4dp"
                         android:textColor="@color/text_gray"
                         android:textSize="14sp"
-                        tools:text="12 canciones"/>
+                        tools:text="2023" />
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- Canciones de la playlist -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Canciones"
                 android:textColor="@color/text_white"
                 android:textSize="18sp"
-                android:textStyle="bold"/>
+                android:textStyle="bold" />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvPlaylistSongs"
+                android:id="@+id/rvAlbumSongs"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
                 android:orientation="vertical"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:listitem="@layout/item_song_card"/>
-
-            <!-- Buscador de canciones -->
-            <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="24dp"
-                android:hint="Descubre">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/etSearchSongs"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="text"
-                    android:textColor="@color/text_white"
-                    android:textColorHint="@color/text_gray"/>
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <!-- Lista de canciones disponibles -->
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="Canciones disponibles"
-                android:textColor="@color/text_white"
-                android:textSize="16sp"
-                android:textStyle="bold"/>
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/rvAvailableSongs"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:orientation="vertical"
-                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                tools:listitem="@layout/item_song_with_add"/>
+                tools:listitem="@layout/item_album_card" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Reproductor fijo al fondo -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="72dp"
@@ -143,7 +112,7 @@
             android:max="100"
             android:progress="0"
             android:progressTint="@color/accent_blue"
-            android:thumb="@null"/>
+            android:thumb="@null" />
 
         <LinearLayout
             android:id="@+id/PlaybackControls"
@@ -159,7 +128,7 @@
                 android:layout_height="48dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_skip_previous"
-                app:tint="@color/text_white"/>
+                app:tint="@color/text_white" />
 
             <ImageButton
                 android:id="@+id/btnPlayPause"
@@ -169,7 +138,7 @@
                 android:layout_marginRight="16dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_play"
-                app:tint="@color/text_white"/>
+                app:tint="@color/text_white" />
 
             <ImageButton
                 android:id="@+id/btnNext"
@@ -177,7 +146,7 @@
                 android:layout_height="48dp"
                 android:background="?attr/selectableItemBackgroundBorderless"
                 android:src="@drawable/ic_skip_next"
-                app:tint="@color/text_white"/>
+                app:tint="@color/text_white" />
         </LinearLayout>
     </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

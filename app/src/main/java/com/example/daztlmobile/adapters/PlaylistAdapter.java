@@ -1,60 +1,83 @@
 package com.example.daztlmobile.adapters;
 
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.daztlmobile.activities.LibraryActivity;
+import com.bumptech.glide.Glide;
+import com.example.daztlmobile.R;
+import com.example.daztlmobile.models.Playlist;
 
 import java.util.List;
 
 public class PlaylistAdapter extends RecyclerView.Adapter<PlaylistAdapter.PlaylistViewHolder> {
 
-    public interface OnPlaylistClickListener {
-        void onPlaylistClick(LibraryActivity.Playlist playlist);
-    }
-
-    private List<LibraryActivity.Playlist> playlists;
+    private List<Playlist> playlists;
     private OnPlaylistClickListener listener;
 
-    public PlaylistAdapter(List<LibraryActivity.Playlist> playlists, OnPlaylistClickListener listener) {
-        this.playlists = playlists;
+
+
+    public interface OnPlaylistClickListener {
+        void onPlaylistClick(Playlist playlist);
+    }
+
+    public PlaylistAdapter(OnPlaylistClickListener listener) {
         this.listener = listener;
+    }
+
+    public void setPlaylists(List<Playlist> playlists) {
+        this.playlists = playlists;
+        notifyDataSetChanged();
     }
 
     @NonNull
     @Override
     public PlaylistViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(android.R.layout.simple_list_item_1, parent, false);
+                .inflate(R.layout.item_playlist, parent, false);
         return new PlaylistViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull PlaylistViewHolder holder, int position) {
-        LibraryActivity.Playlist playlist = playlists.get(position);
-        holder.textView.setText(playlist.getName());
-        holder.itemView.setOnClickListener(v -> listener.onPlaylistClick(playlist));
+        Playlist playlist = playlists.get(position);
+        holder.bind(playlist);
+
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onPlaylistClick(playlist);
+            }
+        });
     }
 
     @Override
     public int getItemCount() {
-        return playlists.size();
+        return playlists != null ? playlists.size() : 0;
     }
 
     static class PlaylistViewHolder extends RecyclerView.ViewHolder {
-        TextView textView;
+        private final ImageView ivCover;
+        private final TextView tvPlaylistName;
 
         public PlaylistViewHolder(@NonNull View itemView) {
             super(itemView);
-            textView = itemView.findViewById(android.R.id.text1);
-            textView.setTextColor(Color.WHITE);
-            textView.setTextSize(18f);
+            ivCover = itemView.findViewById(R.id.ivCover);
+            tvPlaylistName = itemView.findViewById(R.id.tvPlaylistName);
+        }
+
+        public void bind(Playlist playlist) {
+            tvPlaylistName.setText(playlist.name);
+
+            if (playlist.coverUrl != null && !playlist.coverUrl.isEmpty()) {
+                Glide.with(itemView.getContext())
+                        .load(playlist.getFullCoverUrl())
+                        .into(ivCover);
+            }
         }
     }
 }

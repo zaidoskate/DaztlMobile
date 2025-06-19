@@ -3,10 +3,13 @@ package com.example.daztlmobile.services;
 
 import android.app.Service;
 import android.content.Intent;
+import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Binder;
 import android.os.IBinder;
+import android.util.Log;
+
 import androidx.annotation.Nullable;
 import com.example.daztlmobile.models.Song;
 import java.io.IOException;
@@ -21,7 +24,7 @@ public class MusicPlaybackService extends Service {
     private List<Song> playlist = new ArrayList<>();
     private int currentIndex = -1;
 
-    private final String ACTION_PLAYBACK_STATUS = "com.example.daztlmobile.PLAYBACK_STATUS";
+    public static final String ACTION_PLAYBACK_STATUS = "com.example.daztlmobile.PLAYBACK_STATUS";
 
     public class LocalBinder extends Binder {
         public MusicPlaybackService getService() {
@@ -78,26 +81,52 @@ public class MusicPlaybackService extends Service {
     }
 
     public void playSong(int index) {
-        if (index < 0 || index >= playlist.size()) return;
+        if (playlist == null || index < 0 || index >= playlist.size()) {
+            return;
+        }
 
         currentIndex = index;
         Song song = playlist.get(index);
 
-        if (mediaPlayer != null) {
-            mediaPlayer.release();
-        }
-
-        mediaPlayer = new MediaPlayer();
         try {
+            if (mediaPlayer != null) {
+                mediaPlayer.release();
+            }
+
+            mediaPlayer = new MediaPlayer();
+            mediaPlayer.setAudioAttributes(new AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_MEDIA)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
+                    .build());
+
             mediaPlayer.setDataSource(song.getFullAudioUrl());
+
             mediaPlayer.setOnPreparedListener(mp -> {
                 mp.start();
                 notifyPrepared();
+                broadcastUpdate();
             });
+
+            mediaPlayer.setOnErrorListener((mp, what, extra) -> {
+                broadcastUpdate();
+                return true;
+            });
+
+            mediaPlayer.setOnCompletionListener(mp -> {
+                playNext();
+            });
+
             mediaPlayer.prepareAsync();
         } catch (IOException e) {
-            e.printStackTrace();
+            broadcastUpdate();
         }
+    }
+
+    private void broadcastUpdate() {
+        Intent intent = new Intent(ACTION_PLAYBACK_STATUS);
+        intent.putExtra("currentIndex", currentIndex);
+        intent.putExtra("isPlaying", mediaPlayer != null && mediaPlayer.isPlaying());
+        sendBroadcast(intent);
     }
 
     public interface OnPlaybackPreparedListener {
@@ -172,14 +201,6 @@ public class MusicPlaybackService extends Service {
         currentIndex = -1;
         broadcastUpdate();
     }
-
-    private void broadcastUpdate() {
-        Intent intent = new Intent(ACTION_PLAYBACK_STATUS);
-        intent.putExtra("currentIndex", currentIndex);
-        intent.putExtra("isPlaying", mediaPlayer.isPlaying());
-        sendBroadcast(intent);
-    }
-
     @Override
     public void onDestroy() {
         super.onDestroy();

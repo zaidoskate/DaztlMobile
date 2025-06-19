@@ -28,10 +28,12 @@
         <activity android:name=".activities.ProfileActivity" />
         <activity android:name=".activities.PlaylistDetailActivity" />
         <activity android:name=".activities.LibraryActivity" />
+        <activity android:name=".activities.AlbumDetailActivity" />
 
         <service android:name=".services.MusicPlaybackService" />
     </application>
     <uses-permission android:name="android.permission.INTERNET"
         tools:ignore="ManifestOrder" />
+    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
 
 </manifest>
