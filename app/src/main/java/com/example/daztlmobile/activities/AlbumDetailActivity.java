@@ -65,6 +65,8 @@ public class AlbumDetailActivity extends AppCompatActivity implements SongAdapte
     private int albumId;
     private String albumTitle;
 
+    private static String currentFilesURL = "http://10.0.2.2:8000/media/";
+
     private BroadcastReceiver playbackReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -242,7 +244,7 @@ public class AlbumDetailActivity extends AppCompatActivity implements SongAdapte
                 album.id = response.getId();
                 album.title = response.getTitle();
                 album.artistName = response.getArtistName();
-                album.coverUrl = response.getCoverUrl();
+                album.coverUrl = currentFilesURL+response.getCoverUrl();
 
                 List<Song> songs = new ArrayList<>();
                 for (var sr : response.getSongsList()) {
@@ -250,8 +252,8 @@ public class AlbumDetailActivity extends AppCompatActivity implements SongAdapte
                     s.id = sr.getId();
                     s.title = sr.getTitle();
                     s.artistName = sr.getArtist();
-                    s.audioUrl = sr.getAudioUrl();
-                    s.coverUrl = sr.getCoverUrl();
+                    s.audioUrl = currentFilesURL+sr.getAudioUrl();
+                    s.coverUrl = currentFilesURL+sr.getCoverUrl();
                     s.releaseDate = sr.getReleaseDate();
                     songs.add(s);
                 }
@@ -283,7 +285,7 @@ public class AlbumDetailActivity extends AppCompatActivity implements SongAdapte
                     String coverUrl = getIntent().getStringExtra("album_cover_url");
                     if (coverUrl != null && !coverUrl.isEmpty()) {
                         Glide.with(AlbumDetailActivity.this)
-                                .load(coverUrl)
+                                .load(currentFilesURL+coverUrl)
                                 .into(ivAlbumCover);
                     }
                 });

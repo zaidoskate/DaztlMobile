@@ -98,6 +98,8 @@ public class HomeActivity extends AppCompatActivity implements
     private List<Song> searchResults = new ArrayList<>();
     private ImageView dialogCoverPreview;
 
+    private static String currentFilesURL = "http://10.0.2.2:8000/media/";
+
 
     private BroadcastReceiver playbackReceiver = new BroadcastReceiver() {
         @Override
@@ -317,8 +319,8 @@ public class HomeActivity extends AppCompatActivity implements
                     s.id = sr.getId();
                     s.title = sr.getTitle();
                     s.artistName = sr.getArtist();
-                    s.audioUrl = sr.getAudioUrl();
-                    s.coverUrl = sr.getCoverUrl();
+                    s.audioUrl = currentFilesURL+sr.getAudioUrl();
+                    s.coverUrl = currentFilesURL+sr.getCoverUrl();
                     s.releaseDate = sr.getReleaseDate();
                     songs.add(s);
                 }
@@ -358,7 +360,7 @@ public class HomeActivity extends AppCompatActivity implements
                     Playlist p = new Playlist();
                     p.id = pr.getId();
                     p.name = pr.getName();
-                    p.coverUrl = pr.getCoverUrl();
+                    p.coverUrl = currentFilesURL+pr.getCoverUrl();
 
                     List<Song> songs = new ArrayList<>();
                     for (var sr : pr.getSongsList()) {
@@ -366,8 +368,8 @@ public class HomeActivity extends AppCompatActivity implements
                         s.id = sr.getId();
                         s.title = sr.getTitle();
                         s.artistName = sr.getArtist();
-                        s.audioUrl = sr.getAudioUrl();
-                        s.coverUrl = sr.getCoverUrl();
+                        s.audioUrl = currentFilesURL+sr.getAudioUrl();
+                        s.coverUrl = currentFilesURL+sr.getCoverUrl();
                         s.releaseDate = sr.getReleaseDate();
                         songs.add(s);
                     }
@@ -401,7 +403,7 @@ public class HomeActivity extends AppCompatActivity implements
                     a.id = ar.getId();
                     a.title = ar.getTitle();
                     a.artistName = ar.getArtistName();
-                    a.coverUrl = ar.getCoverUrl();
+                    a.coverUrl = currentFilesURL+ar.getCoverUrl();
                     albums.add(a);
                 }
 
@@ -429,7 +431,7 @@ public class HomeActivity extends AppCompatActivity implements
                     Artist a = new Artist();
                     a.id = ar.getId();
                     a.name = ar.getName();
-                    a.profilePicture = ar.getProfilePicture();
+                    a.profilePicture = currentFilesURL+ar.getProfilePicture();
                     a.isLiked = false;
                     artists.add(a);
                 }
@@ -529,8 +531,8 @@ public class HomeActivity extends AppCompatActivity implements
                     s.id = sr.getId();
                     s.title = sr.getTitle();
                     s.artistName = sr.getArtist();
-                    s.audioUrl = sr.getAudioUrl();
-                    s.coverUrl = sr.getCoverUrl();
+                    s.audioUrl = currentFilesURL+sr.getAudioUrl();
+                    s.coverUrl = currentFilesURL+sr.getCoverUrl();
                     s.releaseDate = sr.getReleaseDate();
                     songs.add(s);
                 }

@@ -70,6 +70,8 @@ public class PlaylistDetailActivity extends AppCompatActivity
     private SeekBar seekBar;
     private Handler handler = new Handler();
     private Runnable updateSeekBarRunnable;
+
+    private static String currentFilesURL = "http://10.0.2.2:8000/media/";
     private BroadcastReceiver playbackReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -373,8 +375,8 @@ public class PlaylistDetailActivity extends AppCompatActivity
                         song.id = sr.getId();
                         song.title = sr.getTitle();
                         song.artistName = sr.getArtist();
-                        song.audioUrl = sr.getAudioUrl();
-                        song.coverUrl = sr.getCoverUrl();
+                        song.audioUrl = currentFilesURL+sr.getAudioUrl();
+                        song.coverUrl = currentFilesURL+sr.getCoverUrl();
                         song.releaseDate = sr.getReleaseDate();
                         playlistSongs.add(song);
                     }
@@ -412,8 +414,8 @@ public class PlaylistDetailActivity extends AppCompatActivity
                     song.title = sr.getTitle();
                     song.artistName = sr.getArtist();
                     song.audioUrl = sr.getAudioUrl();
-                    song.setFullCoverUrl(sr.getCoverUrl());
-                    song.releaseDate = sr.getReleaseDate();
+                    song.setFullCoverUrl(currentFilesURL+sr.getCoverUrl());
+                    song.releaseDate = currentFilesURL+sr.getReleaseDate();
                     allSongs.add(song);
                 }
 
